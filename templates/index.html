@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Prediction for Bengaluru</title>
+</head>
+<body>
+    <h1>Weather Prediction for Bengaluru</h1>
+    <form method="POST">
+        <label for="date">Date (YYYY-MM-DD): e.g., 2023-01-02</label><br>
+        <input type="date" id="date" name="date" required><br><br>
+        <label for="time">Time (HH:MM): --:--</label><br>
+        <input type="time" id="time" name="time" required><br><br>
+        <input type="submit" value="Predict">
+    </form>
+
+    <h2>Predicted Temperature Heatmap</h2>
+    {% if image_path %}
+        <img src="{{ url_for('serve_static', filename='prediction_heatmap.png') }}" alt="Prediction Heatmap">
+    {% else %}
+        <p>Enter a date and time to see the prediction...</p>
+    {% endif %}
+</body>
+</html>
