@@ -7,6 +7,7 @@ from tensorflow.keras.losses import MeanSquaredError
 import matplotlib
 import matplotlib.pyplot as plt
 import os
+import socket
 
 # Configure matplotlib to avoid GUI conflicts
 matplotlib.use('Agg')
@@ -45,9 +46,9 @@ def predict_heatmap(date_str, time_str):
         # Parse date and time
         input_date = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
 
-        # Check if date is within the last 3 days
-        if input_date < datetime.now() - timedelta(days=3):
-            return False, "Real-time data available only for the last 3 days."
+        # Remove the 3-day restriction for MVP
+        # if input_date < datetime.now() - timedelta(days=3):
+        #     return False, "Real-time data available only for the last 3 days."
 
         # Dummy input for MVP (shape: (batch, time, latitude, longitude, variables) = (1, 24, 17, 25, 2))
         # Replace with actual data loading (e.g., from .npy or ERA5) post-MVP
@@ -129,23 +130,21 @@ def internal_server_error(e):
 
 if __name__ == '__main__':
     from waitress import serve
+    import os
 
-    print("Starting waitress server on 0.0.0.0:5000...")
-    import socket
-
+    print("Starting waitress server...")
+    port = int(os.getenv('PORT', '5000'))  # Use PORT env variable or default to 5000
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
-    print(f"Server IP: {local_ip}. Access via http://{local_ip}:5000/ or http://127.0.0.1:5000/")
+    print(f"Server IP: {local_ip}. Access via http://{local_ip}:{port}/ or http://127.0.0.1:{port}/")
 
     try:
-        # Check if port 5000 is in use and fallback to 5001 if needed
+        # Check if port is in use and fallback if needed
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('0.0.0.0', 5000))
+        result = sock.connect_ex(('0.0.0.0', port))
         if result == 0:
-            print("Port 5000 in use, trying 5001...")
+            print(f"Port {port} in use, trying 5001...")
             port = 5001
-        else:
-            port = 5000
         sock.close()
         serve(app, host='0.0.0.0', port=port)
     except Exception as e:
